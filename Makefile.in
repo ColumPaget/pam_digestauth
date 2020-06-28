@@ -1,0 +1,43 @@
+CC=@CC@
+CFLAGS=@CFLAGS@ -fPIC -fno-stack-protector 
+LIBS=@LIBS@
+INSTALL=@INSTALL@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+libdir=@libdir@
+mandir=@mandir@
+datarootdir=@datarootdir@
+sysconfdir=@sysconfdir@
+FLAGS=$(CFLAGS) @DEFS@
+OBJ=utility.o sha2.o
+
+
+all: pam_digestauth.so
+
+pam_digestauth.so: common.h pam_module.c $(OBJ)
+	$(CC) $(FLAGS) -opam_digestauth.so -shared -lpam pam_module.c $(OBJ)
+	-strip pam_digestauth.so
+
+utility.o: utility.h utility.c
+	$(CC) $(FLAGS) -c utility.c
+
+sha2.o: sha2.h sha2.c
+	$(CC) $(FLAGS) -c sha2.c
+
+install: pam_digestauth.so
+	$(INSTALL) -d $(DESTDIR)$(bindir)
+	$(INSTALL) -d $(DESTDIR)$(libdir)/security
+	$(INSTALL) -d $(DESTDIR)$(mandir)/man8
+	$(INSTALL) pam_digestauth.so $(DESTDIR)$(libdir)/security
+
+clean:
+	-rm -f *.o *.so
+	-rm -f config.log config.status */config.log */config.status
+	-rm -fr autom4te.cache */autom4te.cache
+
+distclean:
+	-rm -f *.o *.so
+	-rm -f config.log config.status */config.log */config.status Makefile */Makefile
+	-rm -fr autom4te.cache */autom4te.cache
+
